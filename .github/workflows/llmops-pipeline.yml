@@ -42,7 +42,7 @@ jobs:
         format: table
         exit-on-vuln: false
 
-    # 6️⃣ Set up kubeconfig for Kubernetes
+    # 6️⃣ Set up kubeconfig
     - name: Set up Kubeconfig
       run: |
         mkdir -p $HOME/.kube
