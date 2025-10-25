@@ -30,11 +30,13 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/gpt-hf-service:latest
+        tags: |
+          ${{ secrets.DOCKERHUB_USERNAME }}/gpt-hf-service:latest
+          ${{ secrets.DOCKERHUB_USERNAME }}/gpt-hf-service:${{ github.sha }}
 
     # 5️⃣ Scan image with Trivy
     - name: Scan Docker image with Trivy
-      uses: aquasecurity/trivy-action@v1
+      uses: aquasecurity/trivy-action@v0.11.0
       with:
         image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/gpt-hf-service:latest
         format: table
@@ -43,6 +45,7 @@ jobs:
     # 6️⃣ Set up kubectl
     - name: Set up Kubeconfig
       run: |
+        mkdir -p $HOME/.kube
         echo "${{ secrets.KUBECONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
         chmod 600 $HOME/.kube/config
 
@@ -51,3 +54,4 @@ jobs:
       run: |
         kubectl apply -f deployment.yml
         kubectl apply -f service.yml
+        kubectl rollout status deployment/gpt-hf
