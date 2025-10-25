@@ -41,6 +41,10 @@ jobs:
         image-ref: chingyee001120/fastapi-app:latest
         format: table
         exit-on-vuln: false
+        timeout: 15m          # increase timeout to 10 minutes
+        scan-type: image
+        ignore-unfixed: false
+        # skip-update: true    # uncomment if DB updates are slow or fail
 
     # 6️⃣ Set up kubeconfig 
     - name: Set up Kubeconfig
@@ -54,4 +58,4 @@ jobs:
       run: |
         kubectl apply -f deployment.yml
         kubectl apply -f service.yml
-        kubectl rollout status deployment/gpt-hf
+        kubectl rollout status deployment/gpt-huggingface
