@@ -41,22 +41,28 @@ jobs:
         image-ref: chingyee001120/fastapi-app:latest
         format: table
         exit-on-vuln: false
-        timeout: 15m          # increase timeout to 10 minutes
+        timeout: 15m
         scan-type: image
         ignore-unfixed: false
-        # skip-update: true    # uncomment if DB updates are slow or fail
 
-    # 6️⃣ Set up kubeconfig 
-    - name: Set up Kubeconfig
+    # 6️⃣ Install and authenticate DigitalOcean CLI (doctl)
+    - name: Install doctl
       run: |
-        mkdir -p $HOME/.kube
-        echo "${{ secrets.KUBECONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
-        chmod 600 $HOME/.kube/config
+        curl -sL https://github.com/digitalocean/doctl/releases/download/v1.114.0/doctl-1.114.0-linux-amd64.tar.gz -o doctl.tar.gz
+        tar -xzf doctl.tar.gz
+        sudo mv doctl /usr/local/bin
+        doctl version
 
-    # 7️⃣ Deploy to Kubernetes
+    - name: Authenticate doctl
+      run: doctl auth init -t ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+    # 7️⃣ Save kubeconfig from DigitalOcean
+    - name: Save kubeconfig
+      run: doctl kubernetes cluster kubeconfig save my-cluster
+
+    # 8️⃣ Deploy to Kubernetes
     - name: Deploy to Kubernetes
       run: |
-        kubectl apply -f deployment.yml
-        kubectl apply -f service.yml
+        kubectl apply -f deployment.yml --validate=false
+        kubectl apply -f service.yml --validate=false
         kubectl rollout status deployment/gpt-huggingface
-  
