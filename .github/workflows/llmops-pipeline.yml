@@ -59,3 +59,4 @@ jobs:
         kubectl apply -f deployment.yml
         kubectl apply -f service.yml
         kubectl rollout status deployment/gpt-huggingface
+        
